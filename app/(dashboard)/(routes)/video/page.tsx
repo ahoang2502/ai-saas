@@ -16,11 +16,12 @@ import { VideoIcon } from "lucide-react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import toast from "react-hot-toast";
 
 const VideoPage = () => {
   const router = useRouter();
   const [video, setVideo] = useState<string>();
-  const proModal = useProModal()
+  const proModal = useProModal();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -36,11 +37,13 @@ const VideoPage = () => {
 
       const response = await axios.post("/api/video", values);
 
-      setVideo(response.data[0])
+      setVideo(response.data[0]);
       form.reset();
     } catch (error: any) {
       if (error?.response?.status === 403) {
         proModal.onOpen();
+      } else {
+        toast.error("Something went wrong.");
       }
     } finally {
       router.refresh();
@@ -95,12 +98,13 @@ const VideoPage = () => {
             <Loader />
           </div>
         )}
-        {!video && !isLoading && (
-          <Empty label="No video generated." />
-        )}
+        {!video && !isLoading && <Empty label="No video generated." />}
 
         {video && (
-          <video controls className="w-full aspect-video mt-8 rounded-lg border bg-black ">
+          <video
+            controls
+            className="w-full aspect-video mt-8 rounded-lg border bg-black "
+          >
             <source src={video} />
           </video>
         )}
